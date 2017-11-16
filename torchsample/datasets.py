@@ -1,4 +1,3 @@
-
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
@@ -25,7 +24,7 @@ class BaseDataset(object):
     """
 
     def __len__(self):
-        return len(self.inputs) if not isinstance(self.inputs, (tuple,list)) else len(self.inputs[0])
+        return len(self.inputs) if not isinstance(self.inputs, (tuple, list)) else len(self.inputs[0])
 
     def add_input_transform(self, transform, add_to_front=True, idx=None):
         if idx is None:
@@ -80,8 +79,9 @@ class BaseDataset(object):
             the index range of images to load
             e.g. np.arange(4) loads the first 4 inputs+targets
         """
+
         def _parse_shape(x):
-            if isinstance(x, (list,tuple)):
+            if isinstance(x, (list, tuple)):
                 return (len(x),)
             elif isinstance(x, th.Tensor):
                 return x.size()
@@ -96,7 +96,6 @@ class BaseDataset(object):
         elif num_samples is not None and load_range is None:
             load_range = np.arange(num_samples)
 
-
         if self.has_target:
             for enum_idx, sample_idx in enumerate(load_range):
                 input_sample, target_sample = self.__getitem__(sample_idx)
@@ -110,18 +109,18 @@ class BaseDataset(object):
                         for i in range(self.num_inputs):
                             _shape = [len(load_range)] + list(_parse_shape(input_sample[i]))
                             inputs.append(np.empty(_shape))
-                        #inputs = [np.empty((len(load_range), *_parse_shape(input_sample[i]))) for i in range(self.num_inputs)]
+                            # inputs = [np.empty((len(load_range), *_parse_shape(input_sample[i]))) for i in range(self.num_inputs)]
 
                     if self.num_targets == 1:
                         _shape = [len(load_range)] + list(_parse_shape(target_sample))
                         targets = np.empty(_shape)
-                        #targets = np.empty((len(load_range), *_parse_shape(target_sample)))
+                        # targets = np.empty((len(load_range), *_parse_shape(target_sample)))
                     else:
                         targets = []
                         for i in range(self.num_targets):
                             _shape = [len(load_range)] + list(_parse_shape(target_sample[i]))
                             targets.append(np.empty(_shape))
-                        #targets = [np.empty((len(load_range), *_parse_shape(target_sample[i]))) for i in range(self.num_targets)]
+                            # targets = [np.empty((len(load_range), *_parse_shape(target_sample[i]))) for i in range(self.num_targets)]
 
                 if self.num_inputs == 1:
                     inputs[enum_idx] = input_sample
@@ -144,13 +143,13 @@ class BaseDataset(object):
                     if self.num_inputs == 1:
                         _shape = [len(load_range)] + list(_parse_shape(input_sample))
                         inputs = np.empty(_shape)
-                        #inputs = np.empty((len(load_range), *_parse_shape(input_sample)))
+                        # inputs = np.empty((len(load_range), *_parse_shape(input_sample)))
                     else:
                         inputs = []
                         for i in range(self.num_inputs):
                             _shape = [len(load_range)] + list(_parse_shape(input_sample[i]))
                             inputs.append(np.empty(_shape))
-                        #inputs = [np.empty((len(load_range), *_parse_shape(input_sample[i]))) for i in range(self.num_inputs)]
+                            # inputs = [np.empty((len(load_range), *_parse_shape(input_sample[i]))) for i in range(self.num_inputs)]
 
                 if self.num_inputs == 1:
                     inputs[enum_idx] = input_sample
@@ -189,7 +188,7 @@ class BaseDataset(object):
                 if tt_fit:
                     self.target_transform.update_fit(y)
                 if ct_fit:
-                    self.co_transform.update_fit(x,y)
+                    self.co_transform.update_fit(x, y)
 
 
 def _process_array_argument(x):
@@ -199,11 +198,10 @@ def _process_array_argument(x):
 
 
 class TensorDataset(BaseDataset):
-
     def __init__(self,
                  inputs,
                  targets=None,
-                 input_transform=None, 
+                 input_transform=None,
                  target_transform=None,
                  co_transform=None):
         """
@@ -227,17 +225,17 @@ class TensorDataset(BaseDataset):
         """
         self.inputs = _process_array_argument(inputs)
         self.num_inputs = len(self.inputs)
-        self.input_return_processor = _return_first_element_of_list if self.num_inputs==1 else _pass_through
+        self.input_return_processor = _return_first_element_of_list if self.num_inputs == 1 else _pass_through
 
         if targets is None:
             self.has_target = False
         else:
             self.targets = _process_array_argument(targets)
             self.num_targets = len(self.targets)
-            self.target_return_processor = _return_first_element_of_list if self.num_targets==1 else _pass_through
+            self.target_return_processor = _return_first_element_of_list if self.num_targets == 1 else _pass_through
             self.min_inputs_or_targets = min(self.num_inputs, self.num_targets)
-            self.has_target = True            
-        
+            self.has_target = True
+
         self.input_transform = _process_transform_argument(input_transform, self.num_inputs)
         if self.has_target:
             self.target_transform = _process_transform_argument(target_transform, self.num_targets)
@@ -251,7 +249,7 @@ class TensorDataset(BaseDataset):
 
         if self.has_target:
             target_sample = [self.target_transform[i](self.targets[i][index]) for i in range(self.num_targets)]
-            #for i in range(self.min_inputs_or_targets):
+            # for i in range(self.min_inputs_or_targets):
             #    input_sample[i], target_sample[i] = self.co_transform[i](input_sample[i], target_sample[i])
 
             return self.input_return_processor(input_sample), self.target_return_processor(target_sample)
@@ -262,10 +260,13 @@ class TensorDataset(BaseDataset):
 def default_file_reader(x):
     def pil_loader(path):
         return Image.open(path).convert('RGB')
+
     def npy_loader(path):
         return np.load(path)
+
     def nifti_loader(path):
         return nibabel.load(path).get_data()
+
     if isinstance(x, str):
         if x.endswith('.npy'):
             x = npy_loader(x)
@@ -276,12 +277,14 @@ def default_file_reader(x):
                 x = pil_loader(x)
             except:
                 raise ValueError('File Format is not supported')
-    #else:
-        #raise ValueError('x should be string, but got %s' % type(x))
+                # else:
+                # raise ValueError('x should be string, but got %s' % type(x))
     return x
 
+
 def is_tuple_or_list(x):
-    return isinstance(x, (tuple,list))
+    return isinstance(x, (tuple, list))
+
 
 def _process_transform_argument(tform, num_inputs):
     tform = tform if tform is not None else _pass_through
@@ -293,6 +296,7 @@ def _process_transform_argument(tform, num_inputs):
         tform = [tform] * num_inputs
     return tform
 
+
 def _process_co_transform_argument(tform, num_inputs, num_targets):
     tform = tform if tform is not None else _multi_arg_pass_through
     if is_tuple_or_list(tform):
@@ -303,6 +307,7 @@ def _process_co_transform_argument(tform, num_inputs, num_targets):
         tform = [tform] * min(num_inputs, num_targets)
     return tform
 
+
 def _process_csv_argument(csv):
     if isinstance(csv, str):
         df = pd.read_csv(csv)
@@ -312,32 +317,36 @@ def _process_csv_argument(csv):
         raise ValueError('csv argument must be string or dataframe')
     return df
 
+
 def _select_dataframe_columns(df, cols):
     if isinstance(cols[0], str):
-        inputs = df.loc[:,cols].values
+        inputs = df.loc[:, cols].values
     elif isinstance(cols[0], int):
-        inputs = df.iloc[:,cols].values
+        inputs = df.iloc[:, cols].values
     else:
         raise ValueError('Provided columns should be string column names or integer column indices')
     return inputs
+
 
 def _process_cols_argument(cols):
     if isinstance(cols, tuple):
         cols = list(cols)
     return cols
 
+
 def _return_first_element_of_list(x):
     return x[0]
 
+
 def _pass_through(x):
     return x
+
 
 def _multi_arg_pass_through(*x):
     return x
 
 
 class CSVDataset(BaseDataset):
-
     def __init__(self,
                  csv,
                  input_cols=[0],
@@ -377,12 +386,12 @@ class CSVDataset(BaseDataset):
         """
         self.input_cols = _process_cols_argument(input_cols)
         self.target_cols = _process_cols_argument(target_cols)
-        
+
         self.df = _process_csv_argument(csv)
 
         self.inputs = _select_dataframe_columns(self.df, input_cols)
         self.num_inputs = self.inputs.shape[1]
-        self.input_return_processor = _return_first_element_of_list if self.num_inputs==1 else _pass_through
+        self.input_return_processor = _return_first_element_of_list if self.num_inputs == 1 else _pass_through
 
         if target_cols is None:
             self.num_targets = 0
@@ -390,13 +399,13 @@ class CSVDataset(BaseDataset):
         else:
             self.targets = _select_dataframe_columns(self.df, target_cols)
             self.num_targets = self.targets.shape[1]
-            self.target_return_processor = _return_first_element_of_list if self.num_targets==1 else _pass_through
+            self.target_return_processor = _return_first_element_of_list if self.num_targets == 1 else _pass_through
             self.has_target = True
             self.min_inputs_or_targets = min(self.num_inputs, self.num_targets)
 
         self.input_loader = default_file_reader
         self.target_loader = default_file_reader
-        
+
         self.input_transform = _process_transform_argument(input_transform, self.num_inputs)
         if self.has_target:
             self.target_transform = _process_transform_argument(target_transform, self.num_targets)
@@ -406,10 +415,12 @@ class CSVDataset(BaseDataset):
         """
         Index the dataset and return the input + target
         """
-        input_sample = [self.input_transform[i](self.input_loader(self.inputs[index, i])) for i in range(self.num_inputs)]
+        input_sample = [self.input_transform[i](self.input_loader(self.inputs[index, i])) for i in
+                        range(self.num_inputs)]
 
         if self.has_target:
-            target_sample = [self.target_transform[i](self.target_loader(self.targets[index, i])) for i in range(self.num_targets)]
+            target_sample = [self.target_transform[i](self.target_loader(self.targets[index, i])) for i in
+                             range(self.num_targets)]
             for i in range(self.min_inputs_or_targets):
                 input_sample[i], input_sample[i] = self.co_transform[i](input_sample[i], target_sample[i])
 
@@ -439,18 +450,18 @@ class CSVDataset(BaseDataset):
         - list of new datasets with transforms copied
         """
         if isinstance(col, int):
-            split_vals = self.df.iloc[:,col].values.flatten()
+            split_vals = self.df.iloc[:, col].values.flatten()
 
             new_df_list = []
             for unique_split_val in np.unique(split_vals):
-                new_df = self.df[:][self.df.iloc[:,col]==unique_split_val]
+                new_df = self.df[:][self.df.iloc[:, col] == unique_split_val]
                 new_df_list.append(new_df)
         elif isinstance(col, str):
-            split_vals = self.df.loc[:,col].values.flatten()
+            split_vals = self.df.loc[:, col].values.flatten()
 
             new_df_list = []
             for unique_split_val in np.unique(split_vals):
-                new_df = self.df[:][self.df.loc[:,col]==unique_split_val]
+                new_df = self.df[:][self.df.loc[:, col] == unique_split_val]
                 new_df_list.append(new_df)
         else:
             raise ValueError('col argument not valid - must be column name or index')
@@ -468,9 +479,9 @@ class CSVDataset(BaseDataset):
 
         train_indices = np.random.choice(len(self), train_size, replace=False)
         test_indices = np.array([i for i in range(len(self)) if i not in train_indices])
-        
-        train_df = self.df.iloc[train_indices,:]
-        test_df = self.df.iloc[test_indices,:]
+
+        train_df = self.df.iloc[train_indices, :]
+        test_df = self.df.iloc[test_indices, :]
 
         train_dataset = self.copy(train_df)
         test_dataset = self.copy(test_df)
@@ -482,7 +493,7 @@ class CSVDataset(BaseDataset):
             df = self.df
 
         return CSVDataset(df,
-                          input_cols=self.input_cols, 
+                          input_cols=self.input_cols,
                           target_cols=self.target_cols,
                           input_transform=self.input_transform,
                           target_transform=self.target_transform,
@@ -490,15 +501,14 @@ class CSVDataset(BaseDataset):
 
 
 class FolderDataset(BaseDataset):
-
-    def __init__(self, 
+    def __init__(self,
                  root,
                  class_mode='label',
                  input_regex='*',
                  target_regex=None,
-                 input_transform=None, 
+                 input_transform=None,
                  target_transform=None,
-                 co_transform=None, 
+                 co_transform=None,
                  input_loader='npy'):
         """
         Dataset class for loading out-of-memory data.
@@ -545,10 +555,10 @@ class FolderDataset(BaseDataset):
 
         classes, class_to_idx = _find_classes(root)
         inputs, targets = _finds_inputs_and_targets(root, class_mode,
-            class_to_idx, input_regex, target_regex)
+                                                    class_to_idx, input_regex, target_regex)
 
         if len(inputs) == 0:
-            raise(RuntimeError('Found 0 images in subfolders of: %s' % root))
+            raise (RuntimeError('Found 0 images in subfolders of: %s' % root))
         else:
             print('Found %i images' % len(inputs))
 
@@ -558,16 +568,20 @@ class FolderDataset(BaseDataset):
         self.classes = classes
         self.class_to_idx = class_to_idx
 
+        ## add by wangkun
+        self.num_inputs = 1
+        self.num_targets = 1
+
         self.input_transform = input_transform if input_transform is not None else lambda x: x
-        if isinstance(input_transform, (tuple,list)):
+        if isinstance(input_transform, (tuple, list)):
             self.input_transform = transforms.Compose(self.input_transform)
         self.target_transform = target_transform if target_transform is not None else lambda x: x
-        if isinstance(target_transform, (tuple,list)):
+        if isinstance(target_transform, (tuple, list)):
             self.target_transform = transforms.Compose(self.target_transform)
-        self.co_transform = co_transform if co_transform is not None else lambda x,y: (x,y)
-        if isinstance(co_transform, (tuple,list)):
+        self.co_transform = co_transform if co_transform is not None else lambda x, y: (x, y)
+        if isinstance(co_transform, (tuple, list)):
             self.co_transform = transforms.Compose(self.co_transform)
-        
+
         self.class_mode = class_mode
 
     def get_full_paths(self):
@@ -581,14 +595,13 @@ class FolderDataset(BaseDataset):
         target_sample = self.targets[index]
         target_sample = self.target_loader(target_sample)
         target_sample = self.target_transform(target_sample)
-        
+
         input_sample, target_sample = self.co_transform(input_sample, target_sample)
 
         return input_sample, target_sample
-    
+
     def __len__(self):
         return len(self.inputs)
-
 
 
 def _find_classes(dir):
@@ -596,6 +609,7 @@ def _find_classes(dir):
     classes.sort()
     class_to_idx = {classes[i]: i for i in range(len(classes))}
     return classes, class_to_idx
+
 
 def _is_image_file(filename):
     IMG_EXTENSIONS = [
@@ -605,15 +619,16 @@ def _is_image_file(filename):
     ]
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
-def _finds_inputs_and_targets(directory, class_mode, class_to_idx=None, 
-            input_regex=None, target_regex=None, ):
+
+def _finds_inputs_and_targets(directory, class_mode, class_to_idx=None,
+                              input_regex=None, target_regex=None, ):
     """
     Map a dataset from a root folder
     """
     if class_mode == 'image':
         if not input_regex and not target_regex:
-            raise ValueError('must give input_regex and target_regex if'+
-                ' class_mode==image')
+            raise ValueError('must give input_regex and target_regex if' +
+                             ' class_mode==image')
     inputs = []
     targets = []
     for subdir in sorted(os.listdir(directory)):
