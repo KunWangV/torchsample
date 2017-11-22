@@ -212,7 +212,7 @@ class ModuleTrainer(object):
             if (num_inputs != num_targets) or (num_val_inputs != num_val_targets):
                 raise Exception('The number of input/target tensors must be the same for training and validation data\n'
                                 'Num Input tensors: (%i train, %i val), Num Target tensors: (%i train, %i val)' % (
-                                num_inputs, num_val_inputs, num_targets, num_val_targets))
+                                    num_inputs, num_val_inputs, num_targets, num_val_targets))
             val_inputs, val_targets = val_data
         has_val_data = val_data is not None
         num_batches = int(math.ceil(len_inputs / batch_size))
@@ -317,7 +317,7 @@ class ModuleTrainer(object):
         if val_loader is not None:
             num_val_inputs = val_loader.dataset.num_inputs
             num_val_targets = val_loader.dataset.num_targets
-            if (num_inputs !=num_targets ) or ( num_val_inputs != num_val_targets):
+            if (num_inputs != num_val_inputs) or (num_targets != num_val_targets):
                 raise ValueError('num_inputs != num_val_inputs or num_targets != num_val_targets')
         has_val_data = val_loader is not None
         num_batches = int(math.ceil(len_inputs / batch_size))
@@ -358,7 +358,7 @@ class ModuleTrainer(object):
                 loader_iter = iter(loader)
 
                 if self._has_metrics:
-                    self.metric_container.reset() # reset metrics
+                    self.metric_container.reset()  # reset metrics
 
                 for batch_idx in range(num_batches):
 
@@ -513,7 +513,7 @@ class ModuleTrainer(object):
 
             samples_seen += batch_size
             eval_logs['val_loss'] = (samples_seen * eval_logs['val_loss'] + loss.data[0] * batch_size) / (
-            samples_seen + batch_size)
+                samples_seen + batch_size)
 
             if self._has_metrics:
                 metrics_logs = metric_container(output_batch, target_batch)
@@ -555,7 +555,7 @@ class ModuleTrainer(object):
 
             samples_seen += batch_size
             eval_logs['val_loss'] = (samples_seen * eval_logs['val_loss'] + loss.data[0] * batch_size) / (
-            samples_seen + batch_size)
+                samples_seen + batch_size)
 
             if self._has_metrics:
                 metrics_logs = metric_container(output_batch, target_batch)

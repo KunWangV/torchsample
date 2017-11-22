@@ -15,7 +15,8 @@ from torchsample import TensorDataset
 
 import os
 from torchvision import datasets
-ROOT = '/users/ncullen/desktop/data/mnist'
+# ROOT = '/users/ncullen/desktop/data/mnist'
+ROOT='data'
 dataset = datasets.MNIST(ROOT, train=True, download=True)
 x_train, y_train = th.load(os.path.join(dataset.root, 'processed/training.pt'))
 x_test, y_test = th.load(os.path.join(dataset.root, 'processed/test.pt'))
@@ -61,6 +62,7 @@ class Network(nn.Module):
 
 
 model = Network()
+model.cuda()
 trainer = ModuleTrainer(model)
 
 callbacks = [EarlyStopping(patience=10),
@@ -79,7 +81,7 @@ trainer.compile(loss='nll_loss',
                 metrics=metrics, 
                 callbacks=callbacks)
 
-trainer.fit_loader(train_loader, val_loader, num_epoch=20, verbose=1)
+trainer.fit_loader(train_loader, val_loader, num_epoch=20, verbose=1, cuda_device=0)
 
 
 

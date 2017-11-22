@@ -229,6 +229,7 @@ class TensorDataset(BaseDataset):
 
         if targets is None:
             self.has_target = False
+            self.num_targets = 0
         else:
             self.targets = _process_array_argument(targets)
             self.num_targets = len(self.targets)
